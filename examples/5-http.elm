@@ -24,12 +24,13 @@ main =
 type alias Model =
   { topic : String
   , gifUrl : String
+  , error: Bool
   }
 
 
 init : String -> (Model, Cmd Msg)
 init topic =
-  ( Model topic "waiting.gif"
+  ( Model topic "waiting.gif" False
   , getRandomGif topic
   )
 
@@ -40,6 +41,7 @@ init topic =
 
 type Msg
   = MorePlease
+  | SetTopic String
   | FetchSucceed String
   | FetchFail Http.Error
 
@@ -47,14 +49,17 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    SetTopic newTopic ->
+      ({model | topic = newTopic}, Cmd.none)    
+
     MorePlease ->
       (model, getRandomGif model.topic)
 
     FetchSucceed newUrl ->
-      (Model model.topic newUrl, Cmd.none)
+      (Model model.topic newUrl False, Cmd.none)
 
     FetchFail _ ->
-      (model, Cmd.none)
+      (Model model.topic model.gifUrl True, Cmd.none)
 
 
 
@@ -64,12 +69,19 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ h2 [] [text model.topic]
+    [ input [ placeholder "topic", onInput SetTopic ] []
     , button [ onClick MorePlease ] [ text "More Please!" ]
     , br [] []
     , img [src model.gifUrl] []
+    , errorIfPresent model.error
     ]
 
+errorIfPresent: Bool -> Html Msg
+errorIfPresent error =
+  if error == True then
+    p [] [text "There was an error"]
+  else
+    text ""
 
 
 -- SUBSCRIPTIONS
