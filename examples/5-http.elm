@@ -69,7 +69,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ placeholder "topic", onInput SetTopic ] []
+    [ selectTopic ["cats", "dogs", "bunnies"]
     , button [ onClick MorePlease ] [ text "More Please!" ]
     , br [] []
     , img [src model.gifUrl] []
@@ -83,6 +83,15 @@ errorIfPresent error =
   else
     text ""
 
+selectTopic: List String -> Html Msg
+selectTopic options =
+  select [ on "change" (Json.map SetTopic targetValue) ]
+    (List.map topicOption options)
+
+topicOption: String -> Html Msg
+topicOption title =
+  option [value title] [text title]
+   
 
 -- SUBSCRIPTIONS
 
